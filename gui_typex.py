@@ -65,6 +65,17 @@ dest_path_txt.grid(column=1, row=2, sticky="W")
 dest_path_txt.insert(END, 45)
 
 
+# rate of typing Label
+rate_label_txt = Label(window, text="Rate of type: ", font=("Arial", 12))
+rate_label_txt.grid(column=1, row=2, sticky="N")
+
+# rate of typing
+rate_type_txt_var = tk.StringVar()
+rate_type_txt = tk.Entry(window, width=10)
+rate_type_txt.grid(column=1, row=2, sticky="E")
+rate_type_txt.insert(END, 0.01)
+
+
 def clicked_browse_source():
     dir = filedialog.askdirectory()
     source_path_txt.delete(0, END)
@@ -95,7 +106,7 @@ def say(s):
     a = engine.runAndWait()  # blocks
 
 
-def typex(dir, delaytime):
+def typex(dir, delaytime, interval):
     for filename in os.listdir(dir):
         fx = os.path.abspath(filename)
         say('Starting to type file  ' + filename)
@@ -113,7 +124,7 @@ def typex(dir, delaytime):
         with open(dir + "\\" + filename, "r") as fxo:
             # print(fxo.read())
             for line in fxo:
-                pyautogui.typewrite(line, interval=0.01)
+                pyautogui.typewrite(line, interval)
 
         winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
         say('Finished typing file:  ' + filename)
@@ -136,6 +147,7 @@ mgs_txt.grid(column=0, row=5, columnspan=3, sticky="N")
 def clicked_btn_convert():
     oks = 0
     okd = 0
+    rate = 0
     if os.path.isdir(source_path_txt.get()):
         mgs_txt.configure(text="Source path for docx: OK!")
         oks = 1
@@ -145,18 +157,36 @@ def clicked_btn_convert():
     if oks == 1:
         try:
             delay = float(dest_path_txt.get())
+            # rate or interval between typing two chars
+            rate = float(rate_type_txt.get())
             mgs_txt.configure(text="Program started...")
+            if top_is_checked.get():
+                window.attributes('-topmost', True)
+            else:
+                window.attributes('-topmost', True)
+                window.update()
+                window.attributes('-topmost', False)
+
             oks = 2
         except:
             mgs_txt.configure(text="Error: Invalid time delay!")
             oks = 0
 
     if oks == 2:
-        typex(os.path.abspath(source_path_txt.get()), delay)
+        typex(os.path.abspath(source_path_txt.get()), delay, rate)
 
 
 btn_convert = Button(window, text="Click to start", bg="orange", fg="blue", command=clicked_btn_convert)
 btn_convert.grid(column=1, row=4)
+
+top_is_checked = IntVar()
+check = Checkbutton(window, text="Always on top", onvalue=1, offvalue=0, variable=top_is_checked)
+check.grid(column=0,row=4, sticky='W')
+
+
+btn_exit = Button(window, text="Exit", bg="light gray", fg="blue", width=10, command=window.destroy)
+btn_exit.grid(column=2, row=6, sticky='W')
+
 
 
 def main():
